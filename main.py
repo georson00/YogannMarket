@@ -12,10 +12,12 @@ def menu():
         print("4. Delete Product")
         print("5. View All Products")
         print("6. View Products by User ID")
-        print("7. Place Order")
-        print("8. View Orders by User")
-        print("9. Sign Up (Create Account)")
-        print("10. Log In")
+        print("7. Add to Cart")
+        print("8. View Cart")
+        print("9 Place Order from Cart")
+        print("10. View Orders by User")
+        print("11. Sign Up (Create Account)")
+        print("12. Log In")
         print("0. Exit")
         choice = input("Choose an option: ")
 
@@ -47,24 +49,39 @@ def menu():
         
         elif choice == "7":
             if not logged_in_user:
-                print("You must be logged in to place an order.")
+                print("You must be logged in to add items to cart.")
                 continue
 
-            order_id = input("Order ID: ")
+            user_id = logged_in_user["user_id"]
             product_id = input("Product ID: ")
             quantity = int(input("Quantity: "))
-            add_order(order_id, logged_in_user["user_id"], product_id, quantity)
-
+            add_to_cart(user_id, product_id, quantity)
         elif choice == "8":
+            if not logged_in_user:
+                print("You must be logged in to view your cart.")
+                continue
+            
+            user_id = logged_in_user["user_id"]
+            view_cart(user_id)
+
+        elif choice == "9":
+            if not logged_in_user:
+                print("You must be logged in to place an order.")
+                continue
+            
+            user_id = logged_in_user["user_id"]
+            place_order_from_cart(user_id)
+
+        elif choice == "10":
             user_id = input("User ID: ")
             get_orders_by_user(user_id)
 
-        elif choice == "9":
+        elif choice == "11":
             email = input("Email: ")
             password = input("Password: ")
             signup_user(email, password)
 
-        elif choice == "10":
+        elif choice == "12":
             email = input("Email: ")
             password = input("Password: ")
             user_data = login_user(email, password)

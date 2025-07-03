@@ -65,27 +65,6 @@ def get_products_by_user(user_id):
     if not found:
         print("No products found for this user.")
 
-def add_order(order_id, user_id, product_id, quantity):
-    # Get product to calculate total price
-    product_ref = db.collection("products").document(product_id)
-    product_doc = product_ref.get()
-
-    if not product_doc.exists:
-        print(f"Product {product_id} not found.")
-        return
-
-    product_data = product_doc.to_dict()
-    total_price = product_data["price"] * quantity
-
-    db.collection("orders").document(order_id).set({
-        "user_id": user_id,
-        "product_id": product_id,
-        "quantity": quantity,
-        "total_price": total_price,
-        "order_date": datetime.utcnow().isoformat()
-    })
-    print(f"Order {order_id} created successfully.")
-
 
 def get_orders_by_user(user_id):
     orders = db.collection("orders").where("user_id", "==", user_id).stream()
@@ -126,8 +105,92 @@ def get_orders_by_user(user_id):
 
     if not found:
         print("No orders found for this user.")
+def add_to_cart(user_id, product_id, quantity):
+    # Get product to add to cart
+    product_ref = db.collection("products").document(product_id)
+    product_doc = product_ref.get()
+
+    if not product_doc.exists:
+        print("❌ Product not found.")
+
+    product_data = product_doc.to_dict()
+    cart_item_ref = db.collection("users").document(user_id).collection("cart").document(product_id)
+
+    existing = cart_item_ref.get()
+    if existing.exists:
+        current_qty = existing.to_dict().get("quantity",0)
+        cart_item_ref.update({ "quantity": current_qty + quantity})
+        print(f" Updated {product_data["name"]} in cart to {current_qty + quantity} items.")
+
+    else:
+        cart_item_ref.set({
+            "name": product_data["name"],
+            "price": product_data["price"],
+            "quantity": quantity
+        })
+        print(f" Added {product_data["name"]} to cart.")
+
+def view_cart(user_id):
+    cart_ref = db.collection("users").document(user_id).collection("cart")
+    cart_items = cart_ref.stream()
+    total = 0
+    found = False
+
+    print("\n🛒 Your Cart:")
+    for item in cart_items:
+        found = True
+        data   = item.to_dict()
+        subtotal = data["quantity"] * data["price"]
+        total += subtotal
+        print(f"- {data["name"]} (x{data["quantity"]}) - ${data["price"]} each | Subtotal: ${subtotal:.2f}")
+
+    if found:
+        print(f"Total: ${total:.2f}\n")
+    else:
+        print("Cart is empty.\n")
+
+def place_order_from_cart(user_id):
+    cart_ref = db.collection("users").document(user_id).collection("cart")
+    cart_items =  list(cart_ref.stream())
+
+    if not cart_items:
+        print("❌ Your cart 🛒 is empty. Add items to your cart before placing an order.")
+        return
+    order_items = []
+    total = 0
+    for item in cart_items:
+        data = item.to_dict()
+        order_items.append({
+            "product_id": item.id,
+            "name": data["name"],
+            "quantity": data["quantity"],
+            "price": data["price"] 
+        })
+        total += data["quantity"] * data["price"]
+    order_data = {
+        "user_id": user_id,
+        "items": order_items,
+        "total_price": total,
+        "order_date": datetime.utcnow().isoformat()
+
+    }
+
+    db.collection("orders").add(order_data)
+    print(f"✅ Order placed successfully! Total: ${total:.2f}")
+    # Clear the cart after placing the order
+    for item in cart_items:
+        item.reference.delete()
 
 
+def clear_cart(user_id):
+    cart_ref= db.collection("users").document(user_id).collection("cart")
+    cart_items = list(cart_ref.stream())
+    for item in cart_items:
+        item.reference.delete()
+
+    print("🗑️ Cart cleared successfully.")
+ 
+        
 
 FIREBASE_API_KEY = "AIzaSyAtuUjvCtOVX1q3zKUEVsParWWR9TXjIZo"
 
@@ -157,7 +220,7 @@ def signup_user(email, password):
                 "WEAK_PASSWORD": "❌ Password should be at least 6 characters.",
             }
 
-            # Some Firebase errors have details like "WEAK_PASSWORD : ..."
+            # Input Error Handling"
             for key in friendly_errors:
                 if key in error_message:
                     print(friendly_errors[key])
