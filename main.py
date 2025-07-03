@@ -14,10 +14,11 @@ def menu():
         print("6. View Products by User ID")
         print("7. Add to Cart")
         print("8. View Cart")
-        print("9 Place Order from Cart")
-        print("10. View Orders by User")
-        print("11. Sign Up (Create Account)")
-        print("12. Log In")
+        print("9. Clear Cart")
+        print("10. Place Order from Cart")
+        print("11. View Orders by User")
+        print("12. Sign Up (Create Account)")
+        print("13. Log In")
         print("0. Exit")
         choice = input("Choose an option: ")
 
@@ -63,8 +64,15 @@ def menu():
             
             user_id = logged_in_user["user_id"]
             view_cart(user_id)
-
         elif choice == "9":
+            if not logged_in_user:
+                print("You must be logged in to clear your cart.")
+                continue
+            
+            user_id = logged_in_user["user_id"]
+            clear_cart(user_id)
+
+        elif choice == "10":
             if not logged_in_user:
                 print("You must be logged in to place an order.")
                 continue
@@ -72,16 +80,16 @@ def menu():
             user_id = logged_in_user["user_id"]
             place_order_from_cart(user_id)
 
-        elif choice == "10":
+        elif choice == "11":
             user_id = input("User ID: ")
             get_orders_by_user(user_id)
 
-        elif choice == "11":
+        elif choice == "12":
             email = input("Email: ")
             password = input("Password: ")
             signup_user(email, password)
 
-        elif choice == "12":
+        elif choice == "13":
             email = input("Email: ")
             password = input("Password: ")
             user_data = login_user(email, password)

@@ -188,7 +188,7 @@ def clear_cart(user_id):
     for item in cart_items:
         item.reference.delete()
 
-    print("🗑️ Cart cleared successfully.")
+    print("\n🗑️ Cart cleared successfully.")
  
         
 
