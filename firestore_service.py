@@ -85,15 +85,17 @@ def get_orders_by_user(user_id):
 
         # Get product name using product_id
         product_id = data.get("product_id")
-        product_name = "Unknown Product"
+        product_name = data.get("name")
         if product_id:
             product_ref = db.collection("products").document(product_id)
             product_doc = product_ref.get()
             if product_doc.exists:
                 product_data = product_doc.to_dict()
-                product_name = product_data.get("name", product_name)
+                product_name = product_data["name"]
 
         # Display formatted output
+        print()
+        print("-" * 40)
         print("-" * 40)
         print(f"🛒 Order ID   : {order.id}")
         print(f"Product      : {product_name} (ID: {product_id})")
@@ -101,6 +103,7 @@ def get_orders_by_user(user_id):
         print(f"Total Price  : ${data.get('total_price'):.2f}")
         print(f"Ordered By   : {data.get('user_id')}")
         print(f"Order Date   : {formatted_date}")
+        print("-" * 40)
         print("-" * 40)
 
     if not found:

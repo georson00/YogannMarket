@@ -6,12 +6,12 @@ def menu():
     global logged_in_user
     while True:
         print("\n==== E-Commerce Cloud App ====")
-        print("1. Add User")
+        print("1. Add user (Seller)")
         print("2. Add Product")
         print("3. Update Product")
         print("4. Delete Product")
         print("5. View All Products")
-        print("6. View Products by User ID")
+        print("6. View Products by User (Seller) ID")
         print("7. Add to Cart")
         print("8. View Cart")
         print("9. Clear Cart")
@@ -41,6 +41,7 @@ def menu():
             field = input("Field to update (name, price, description): ")
             value = input("New value: ")
             update_product(pid, {field: float(value) if field == "price" else value})
+            print("✅Product updated successfully.")
         elif choice == "4":
             delete_product(input("Product ID to delete: "))
         elif choice == "5":
@@ -85,9 +86,11 @@ def menu():
             get_orders_by_user(user_id)
 
         elif choice == "12":
+            print("Create a new account.")
+            full_name = input("Full Name: ")
             email = input("Email: ")
             password = input("Password: ")
-            signup_user(email, password)
+            signup_user(full_name, email, password)
 
         elif choice == "13":
             email = input("Email: ")
