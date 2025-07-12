@@ -199,9 +199,10 @@ FIREBASE_API_KEY = "AIzaSyAtuUjvCtOVX1q3zKUEVsParWWR9TXjIZo"
 
 FIREBASE_AUTH_URL = "https://identitytoolkit.googleapis.com/v1/accounts"
 
-def signup_user(email, password):
+def signup_user(fullname, email, password):
     url = f"{FIREBASE_AUTH_URL}:signUp?key={FIREBASE_API_KEY}"
     payload = {
+        "displayName": fullname,
         "email": email,
         "password": password,
         "returnSecureToken": True
